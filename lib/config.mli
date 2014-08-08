@@ -14,7 +14,7 @@ type config = private {
   secure_reneg      : bool ; (** other end must use secure renegotiation (RFC 5746) *)
   authenticator     : X509.Authenticator.t option ; (** optional X509 authenticator *)
   peer_name         : string option ; (** optional name of other endpoint (used for SNI RFC4366) *)
-  own_certificate   : own_cert option ; (** optional certificate chain *)
+  own_certificates  : own_cert option * own_cert list ; (** optional default certificate chain and other certificate chains *)
 }
 
 module Ciphers : sig
@@ -75,7 +75,7 @@ val server :
   ?version      : tls_version * tls_version ->
   ?hashes       : Packet.hash_algorithm list ->
   ?reneg        : bool ->
-  ?certificate  : own_cert ->
+  ?certificates : own_cert option * own_cert list ->
   ?secure_reneg : bool ->
   unit -> server
 
