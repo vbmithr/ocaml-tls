@@ -24,6 +24,8 @@ module Unix : sig
   val read_bytes  : t -> Lwt_bytes.t -> int -> int -> int  Lwt.t
   val write_bytes : t -> Lwt_bytes.t -> int -> int -> unit Lwt.t
 
+  val epoch  : t -> Tls.Engine.epoch
+
 end
 
 type ic = Lwt_io.input_channel
@@ -34,7 +36,7 @@ val accept_ext :
   ((ic * oc) * Lwt_unix.sockaddr) Lwt.t
 
 val accept :
-  ?trace:tracer -> X509_lwt.priv -> Lwt_unix.file_descr ->
+  ?trace:tracer -> Tls.Config.own_cert -> Lwt_unix.file_descr ->
   ((ic * oc) * Lwt_unix.sockaddr) Lwt.t
 
 val connect_ext :
