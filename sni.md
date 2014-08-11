@@ -10,19 +10,25 @@ it presents to the client.
 
 A user provides a full certificate chain and a private key
 corresponding to the first certificate in the list to OCaml-TLS,
-captured by the type `own_cert`.
+captured by the type `certchain`.
 
 ````
-type own_cert = Certificate.certificate list * Nocrypto.Rsa.priv
+type certchain = Certificate.certificate list * Nocrypto.Rsa.priv
 ````
 
-There is one `own_cert` which is the default - to be used if nothing
-matches, or if you don't care about SNI at all. A user can also
-provide a list of `own_cert` to be chosen from depending on the
-indicated server name:
+The `own_cert` polymorphic variant covers the various configuration
+options: either no certificate is provided, a single one, multiple
+ones (whose common name/subject alternative name are used for
+disambiguation), and multiple with a default one.
 
 ````
-  own_certificates  : own_cert option * own_cert list ;
+type own_cert = [
+  | `None
+  | `Single of certchain
+  | `Multiple of certchain list
+  | `Multiple_default of certchain * certchain list
+]
+
 ````
 
 ### Validation
@@ -35,8 +41,8 @@ encipherment, DHE_RSA requires key_usage to contain digital_signature.
 There must exist at least one certificate with the mentioned
 properties for each configured ciphersuite.
 
-Furthermore, to avoid ambiguity, the hostnames of the list of
-`own_cert` is checked to be non-overlapping.
+Furthermore, to avoid ambiguity, the hostnames in ``Multiple` and
+``Multiple_default` certificate lists must be non-overlapping.
 
 ### Certificate selection
 
