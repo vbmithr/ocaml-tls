@@ -3,7 +3,15 @@ open Core
 (** Configuration of the TLS stack *)
 
 (** certificate chain and private key of the first certificate *)
-type own_cert = Certificate.certificate list * Nocrypto.Rsa.priv
+type certchain = Certificate.certificate list * Nocrypto.Rsa.priv
+
+(** polymorphic variant of own certificates *)
+type own_cert = [
+  | `None
+  | `Single of certchain
+  | `Multiple of certchain list
+  | `Multiple_default of certchain * certchain list
+]
 
 (** configuration parameters *)
 type config = private {
@@ -14,7 +22,7 @@ type config = private {
   secure_reneg      : bool ; (** other end must use secure renegotiation (RFC 5746) *)
   authenticator     : X509.Authenticator.t option ; (** optional X509 authenticator *)
   peer_name         : string option ; (** optional name of other endpoint (used for SNI RFC4366) *)
-  own_certificates  : own_cert option * own_cert list ; (** optional default certificate chain and other certificate chains *)
+  own_certificates  : own_cert ; (** own certificate chain and private keys *)
 }
 
 module Ciphers : sig
@@ -75,7 +83,7 @@ val server :
   ?version      : tls_version * tls_version ->
   ?hashes       : Packet.hash_algorithm list ->
   ?reneg        : bool ->
-  ?certificates : own_cert option * own_cert list ->
+  ?certificates : own_cert ->
   ?secure_reneg : bool ->
   unit -> server
 
